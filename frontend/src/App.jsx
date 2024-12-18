@@ -15,34 +15,29 @@ function App() {
 
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
-    console.log("Saved Token:", savedToken);
-
-    if (!savedToken) {
-      setToken(null);
-    } else {
-      setToken(savedToken);
+    if (savedToken) {
+      setToken(savedToken); // Retrieve the saved token on load
     }
-
     setLoading(false);
   }, []);
 
   const handleLogin = (newToken) => {
     setToken(newToken);
-    localStorage.setItem("token", newToken);
+    localStorage.setItem("token", newToken); // Store token in localStorage
   };
 
   const handleLogout = () => {
-    setToken(null);
-    localStorage.removeItem("token");
+    setToken(null); // Clear token from state
+    localStorage.removeItem("token"); // Remove token from localStorage
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Loading...</div>; // Show loading until token is checked
   }
 
   return (
     <Router>
-      <Navbar />
+      <Navbar onLogout={handleLogout} /> {/* Pass logout handler to Navbar */}
       <Routes>
         <Route
           path="/"
@@ -54,7 +49,6 @@ function App() {
             )
           }
         />
-
         <Route
           path="/rooms"
           element={

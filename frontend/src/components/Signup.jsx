@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const SignupForm = ({ onSignup }) => {
   const [email, setEmail] = useState("");
@@ -6,6 +7,7 @@ const SignupForm = ({ onSignup }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -25,8 +27,9 @@ const SignupForm = ({ onSignup }) => {
       .then((data) => {
         if (data.token) {
           onSignup(data.token);
+          navigate("/rooms"); // Redirect to /rooms after successful signup
         } else {
-          setError(data.error);
+          setError(data.error || "Signup failed");
         }
       })
       .catch((error) => setError("Something went wrong"));
@@ -34,7 +37,7 @@ const SignupForm = ({ onSignup }) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>Create Account</h2>
+      <h2>Sign Up</h2>
       <label>
         First Name:
         <input

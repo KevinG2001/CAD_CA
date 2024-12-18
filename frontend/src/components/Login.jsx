@@ -18,8 +18,9 @@ const LoginForm = ({ onLogin }) => {
       .then((data) => {
         if (data.token) {
           onLogin(data.token);
+          window.location.reload(); // Re render the page because navigate wouldnt work
         } else {
-          setError(data.error);
+          setError(data.error || "Invalid credentials");
         }
       })
       .catch((error) => setError("Something went wrong"));

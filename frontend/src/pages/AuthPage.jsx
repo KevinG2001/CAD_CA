@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import LoginForm from "../components/Login";
 import SignupForm from "../components/Signup";
 
 const AuthPage = () => {
   const [isSignup, setIsSignup] = useState(false);
   const [token, setToken] = useState("");
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const toggleForm = () => {
     setIsSignup(!isSignup);
@@ -13,11 +15,13 @@ const AuthPage = () => {
   const handleLogin = (token) => {
     setToken(token);
     localStorage.setItem("token", token);
+    navigate("/rooms"); // Redirect after successful login
   };
 
   const handleSignup = (token) => {
     setToken(token);
     localStorage.setItem("token", token);
+    navigate("/rooms"); // Redirect after successful signup
   };
 
   return (
