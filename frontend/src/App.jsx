@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import RoomsList from "./pages/RoomList";
 import AuthPage from "./pages/AuthPage";
+import Navbar from "./components/Navbar";
 
 function App() {
   const [token, setToken] = useState(null);
@@ -41,6 +42,7 @@ function App() {
 
   return (
     <Router>
+      <Navbar />
       <Routes>
         <Route
           path="/"

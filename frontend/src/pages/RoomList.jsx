@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "../styles/roomStyles.css";
 
 const RoomList = () => {
   const [rooms, setRooms] = useState([]);
@@ -53,7 +54,7 @@ const RoomList = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        room_id: selectedRoom.id, // Pass room_id as a part of the request body
+        room_id: selectedRoom.id,
         start_date: startDate,
         end_date: endDate,
       }),
@@ -61,10 +62,10 @@ const RoomList = () => {
       .then((response) => response.json())
       .then((data) => {
         if (data.message) {
-          alert(data.message); // Show success message
-          setError(""); // Clear any previous errors
+          alert(data.message);
+          setError("");
         } else {
-          setError(data.error); // Show error message if the booking failed
+          setError(data.error);
         }
       })
       .catch((err) => {
@@ -74,18 +75,21 @@ const RoomList = () => {
   };
 
   return (
-    <div>
-      <h1>Rooms</h1>
-      <ul>
-        {rooms.map((room) => (
-          <li key={room.id} onClick={() => setSelectedRoom(room)}>
-            {room.name}
-          </li>
-        ))}
-      </ul>
+    <div className="rooms-container">
+      {rooms.map((room) => (
+        <div
+          key={room.id}
+          className="room-card"
+          onClick={() => setSelectedRoom(room)}
+        >
+          <h3>{room.name}</h3>
+          <p>Capacity: {room.capacity}</p>
+          <button className="book-button available">Select Room</button>
+        </div>
+      ))}
 
       {selectedRoom && (
-        <div>
+        <div className="booking-form">
           <h2>Book {selectedRoom.name}</h2>
           <label>
             Start Date:
@@ -104,7 +108,7 @@ const RoomList = () => {
             />
           </label>
           <button onClick={checkAvailability}>Check Availability</button>
-          {error && <p>{error}</p>}
+          {error && <p style={{ color: "red" }}>{error}</p>}
         </div>
       )}
     </div>

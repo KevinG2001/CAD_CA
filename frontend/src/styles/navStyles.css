@@ -1,0 +1,20 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.linkWrapper {
+  display: flex;
+  flex-direction: row;
+  width: 20%;
+  justify-content: space-evenly;
+}
+
+.link:hover {
+  color: blue;
+  text-decoration: underline;
+  transition: ease-in-out 0.5s;
+  cursor: pointer;
+}
