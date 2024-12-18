@@ -1,67 +1,114 @@
 import React, { useState, useEffect } from "react";
-import "../styles/roomStyles.css";
 
-function RoomsList() {
+const RoomList = () => {
   const [rooms, setRooms] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchRooms = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/api/rooms");
-
-      console.log("Response status:", response.status);
-      console.log("Response headers:", response.headers);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `HTTP error! status: ${response.status}, body: ${errorText}`
-        );
-      }
-
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const text = await response.text();
-        throw new Error(`Expected JSON, got: ${text}`);
-      }
-
-      const data = await response.json();
-      setRooms(data);
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Detailed error fetching rooms:", error);
-      setError(error);
-      setIsLoading(false);
-    }
-  };
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchRooms();
+    // Fetch available rooms
+    fetch("http://localhost:3000/api/rooms")
+      .then((response) => response.json())
+      .then((data) => setRooms(data))
+      .catch((error) => console.error("Error fetching rooms:", error));
   }, []);
 
+  const checkAvailability = () => {
+    if (!startDate || !endDate) {
+      setError("Please select both start and end dates");
+      return;
+    }
+
+    fetch(
+      `http://localhost:3000/api/rooms/${selectedRoom.id}/check_availability`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ start_date: startDate, end_date: endDate }),
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.error) {
+          setError(data.error);
+        } else {
+          // Availability check passed, now create the booking
+          createBooking();
+        }
+      })
+      .catch((err) => {
+        console.error("Error:", err);
+        setError("Something went wrong. Please try again.");
+      });
+  };
+
+  const createBooking = () => {
+    fetch("http://localhost:3000/api/bookings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        room_id: selectedRoom.id, // Pass room_id as a part of the request body
+        start_date: startDate,
+        end_date: endDate,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message) {
+          alert(data.message); // Show success message
+          setError(""); // Clear any previous errors
+        } else {
+          setError(data.error); // Show error message if the booking failed
+        }
+      })
+      .catch((err) => {
+        console.error("Error:", err);
+        setError("Something went wrong while creating the booking.");
+      });
+  };
+
   return (
-    <div className="rooms-container">
-      <h1>Our Rooms</h1>
-      <div className="rooms-grid">
+    <div>
+      <h1>Rooms</h1>
+      <ul>
         {rooms.map((room) => (
-          <div key={room.id} className="room-card">
-            <h2>{room.name}</h2>
-            <p>Price per night: ${room.price_per_night}</p>
-            <p>Status: {room.booked ? "Booked" : "Available"}</p>
-            <button
-              className={`book-button ${
-                room.booked ? "disabled" : "available"
-              }`}
-              disabled={room.booked}
-            >
-              {room.booked ? "Booked" : "Book Now"}
-            </button>
-          </div>
+          <li key={room.id} onClick={() => setSelectedRoom(room)}>
+            {room.name}
+          </li>
         ))}
-      </div>
+      </ul>
+
+      {selectedRoom && (
+        <div>
+          <h2>Book {selectedRoom.name}</h2>
+          <label>
+            Start Date:
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+          </label>
+          <label>
+            End Date:
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </label>
+          <button onClick={checkAvailability}>Check Availability</button>
+          {error && <p>{error}</p>}
+        </div>
+      )}
     </div>
   );
-}
+};
 
-export default RoomsList;
+export default RoomList;

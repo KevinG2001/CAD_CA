@@ -10,9 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_12_17_223427) do
+ActiveRecord::Schema[8.0].define(version: 2024_12_17_233703) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "bookings", force: :cascade do |t|
+    t.bigint "room_id", null: false
+    t.date "start_date"
+    t.date "end_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["room_id"], name: "index_bookings_on_room_id"
+  end
 
   create_table "rooms", force: :cascade do |t|
     t.string "name"
@@ -21,4 +30,6 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_17_223427) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
+
+  add_foreign_key "bookings", "rooms"
 end
