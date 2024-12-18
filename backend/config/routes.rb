@@ -6,7 +6,7 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :bookings, only: [:index, :create]
+    resources :bookings, only: [:index, :create, :destroy]
 
     post '/auth/signup', to: 'auth#signup'
     post '/auth/login', to: 'auth#login'

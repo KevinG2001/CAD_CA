@@ -43,6 +43,18 @@ class Api::BookingsController < ActionController::API
     end
   end
   
+  def destroy    
+    @booking = current_user.bookings.find(params[:id])  
+    
+    if @booking.destroy
+      render json: { message: 'Booking deleted successfully' }, status: :ok
+    else
+      render json: { error: @booking.errors.full_messages }, status: :unprocessable_entity
+    end
+  rescue ActiveRecord::RecordNotFound => e
+    Rails.logger.error "Booking not found: #{e.message}"
+    render json: { error: 'Booking not found or unauthorized' }, status: :not_found
+  end
 
   private
 
@@ -63,6 +75,7 @@ class Api::BookingsController < ActionController::API
       render json: { error: "Invalid token" }, status: :unauthorized
     end
   end
+  
 
   # Accessor for the current_user
   def current_user

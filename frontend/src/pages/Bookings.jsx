@@ -31,6 +31,28 @@ const Bookings = () => {
     fetchBookings();
   }, []);
 
+  const cancelBooking = async (bookingId) => {
+    const response = await fetch(
+      `http://localhost:3000/api/bookings/${bookingId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+    console.log(data);
+
+    if (response.ok) {
+      setBookings(bookings.filter((booking) => booking.id !== bookingId));
+    } else {
+      setError(data.error || "Failed to cancel booking");
+    }
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const day = date.getDate();
@@ -56,6 +78,7 @@ const Bookings = () => {
             <div className="table-cell">Start Date</div>
             <div className="table-cell">End Date</div>
             <div className="table-cell">Status</div>
+            <div className="table-cell">Options</div>
           </div>
           {bookings.map((booking) => (
             <div key={booking.id} className="bookings-table-row">
@@ -63,6 +86,11 @@ const Bookings = () => {
               <div className="table-cell">{formatDate(booking.start_date)}</div>
               <div className="table-cell">{formatDate(booking.end_date)}</div>
               <div className="table-cell">{booking.status || "Pending"}</div>
+              <div className="table-cell">
+                <button onClick={() => cancelBooking(booking.id)}>
+                  Cancel
+                </button>
+              </div>
             </div>
           ))}
         </div>
