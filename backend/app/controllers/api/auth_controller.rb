@@ -1,5 +1,6 @@
 module Api
   class AuthController < ActionController::API
+    
     def signup
       user = User.new(user_params)
       if user.save
@@ -27,7 +28,8 @@ module Api
     end    
 
     def encode_token(user_id, is_admin)
-      JWT.encode({ user_id: user_id, exp: 24.hours.from_now.to_i, is_admin: is_admin }, 'your_secret_key')
+      payload = { user_id: user_id, exp: 24.hours.from_now.to_i, is_admin: is_admin }
+      JWT.encode(payload, Rails.application.secret_key_base)
     end
   end
 end

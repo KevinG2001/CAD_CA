@@ -8,6 +8,7 @@ import {
 import RoomsList from "./pages/RoomList";
 import AuthPage from "./pages/AuthPage";
 import Navbar from "./components/Navbar";
+import Bookings from "./pages/Bookings"; // Import the Bookings page
 
 function App() {
   const [token, setToken] = useState(null);
@@ -70,7 +71,10 @@ function App() {
             )
           }
         />
-        {/* Optionally add routes for admin pages */}
+        <Route
+          path="/bookings"
+          element={token ? <Bookings /> : <Navigate to="/" />}
+        />
       </Routes>
     </Router>
   );

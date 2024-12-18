@@ -37,8 +37,7 @@ const RoomList = () => {
         if (data.error) {
           setError(data.error);
         } else {
-          // Availability check passed, now create the booking
-          createBooking();
+          createBooking(selectedRoom.id, startDate, endDate);
         }
       })
       .catch((err) => {
@@ -47,31 +46,37 @@ const RoomList = () => {
       });
   };
 
-  const createBooking = () => {
-    fetch("http://localhost:3000/api/bookings", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        room_id: selectedRoom.id,
-        start_date: startDate,
-        end_date: endDate,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.message) {
-          alert(data.message);
-          setError("");
-        } else {
-          setError(data.error);
-        }
-      })
-      .catch((err) => {
-        console.error("Error:", err);
-        setError("Something went wrong while creating the booking.");
+  const createBooking = async (roomId, startDate, endDate) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("No token found. Please log in.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          room_id: roomId,
+          start_date: startDate,
+          end_date: endDate,
+        }),
       });
+
+      const data = await response.json();
+      if (response.ok) {
+        console.log("Booking successful", data);
+      } else {
+        console.error("Failed to make booking:", data.error || data.message);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   return (
