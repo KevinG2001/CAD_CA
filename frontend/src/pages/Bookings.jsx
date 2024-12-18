@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import "../styles/bookingStyles.css"; // Assuming you have your styles here
+import "../styles/bookingStyles.css";
 
 const Bookings = () => {
   const [bookings, setBookings] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Fetch bookings from the API
     const fetchBookings = async () => {
       console.log("Bearer Token:", localStorage.getItem("token"));
       try {
@@ -24,7 +23,7 @@ const Bookings = () => {
           setError(data.error || "Failed to fetch bookings");
         }
       } catch (error) {
-        console.error(error); // Log error for debugging
+        console.error(error);
         setError("Something went wrong while fetching the bookings.");
       }
     };
@@ -32,7 +31,6 @@ const Bookings = () => {
     fetchBookings();
   }, []);
 
-  // Function to format dates manually
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const day = date.getDate();
@@ -44,7 +42,7 @@ const Bookings = () => {
       day < 10 ? "0" + day : day
     }/${year}`;
   };
-
+  console.log(bookings);
   return (
     <div className="bookings-container">
       <h1>Your Bookings</h1>

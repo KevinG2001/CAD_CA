@@ -2,8 +2,16 @@ class Api::BookingsController < ActionController::API
   before_action :authenticate_user!
 
   def index
-    bookings = current_user.bookings
-    render json: bookings
+    bookings = current_user.bookings.includes(:room)
+  
+    render json: bookings.as_json(
+      only: [:id, :start_date, :end_date, :created_at, :updated_at],
+      include: {
+        room: {
+          only: [:id, :name]
+        }
+      }
+    )
   end
 
   def create
@@ -18,12 +26,23 @@ class Api::BookingsController < ActionController::API
       booking = room.bookings.new(start_date: start_date, end_date: end_date, user: @current_user)
   
       if booking.save
-        render json: { message: "Room successfully booked!" }, status: 201
+        render json: {
+          message: "Room successfully booked!",
+          booking: booking.as_json(
+            only: [:id, :start_date, :end_date],
+            include: {
+              room: {
+                only: [:id, :name]
+              }
+            }
+          )
+        }, status: 201
       else
         render json: { error: "Failed to create booking" }, status: 500
       end
     end
   end
+  
 
   private
 
