@@ -7,5 +7,8 @@ Rails.application.routes.draw do
     end
 
     resources :bookings, only: [:create]
+
+    post '/auth/signup', to: 'auth#signup'
+    post '/auth/login', to: 'auth#login'
   end
 end
