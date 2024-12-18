@@ -11,33 +11,44 @@ import Navbar from "./components/Navbar";
 
 function App() {
   const [token, setToken] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
-    if (savedToken) {
-      setToken(savedToken); // Retrieve the saved token on load
+    const savedIsAdmin = localStorage.getItem("isAdmin") === "true";
+
+    if (!savedToken) {
+      setToken(null);
+    } else {
+      setToken(savedToken);
+      setIsAdmin(savedIsAdmin);
     }
+
     setLoading(false);
   }, []);
 
-  const handleLogin = (newToken) => {
+  const handleLogin = (newToken, adminStatus) => {
     setToken(newToken);
-    localStorage.setItem("token", newToken); // Store token in localStorage
+    setIsAdmin(adminStatus);
+    localStorage.setItem("token", newToken);
+    localStorage.setItem("isAdmin", adminStatus);
   };
 
   const handleLogout = () => {
-    setToken(null); // Clear token from state
-    localStorage.removeItem("token"); // Remove token from localStorage
+    setToken(null);
+    setIsAdmin(false);
+    localStorage.removeItem("token");
+    localStorage.removeItem("isAdmin");
   };
 
   if (loading) {
-    return <div>Loading...</div>; // Show loading until token is checked
+    return <div>Loading...</div>;
   }
 
   return (
     <Router>
-      <Navbar onLogout={handleLogout} /> {/* Pass logout handler to Navbar */}
+      <Navbar onLogout={handleLogout} />
       <Routes>
         <Route
           path="/"
@@ -52,9 +63,14 @@ function App() {
         <Route
           path="/rooms"
           element={
-            token ? <RoomsList onLogout={handleLogout} /> : <Navigate to="/" />
+            token ? (
+              <RoomsList isAdmin={isAdmin} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" />
+            )
           }
         />
+        {/* Optionally add routes for admin pages */}
       </Routes>
     </Router>
   );

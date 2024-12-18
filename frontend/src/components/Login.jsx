@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const LoginForm = ({ onLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -17,8 +19,8 @@ const LoginForm = ({ onLogin }) => {
       .then((response) => response.json())
       .then((data) => {
         if (data.token) {
-          onLogin(data.token);
-          window.location.reload(); // Re render the page because navigate wouldnt work
+          onLogin(data.token, data.is_admin);
+          window.location.reload(); // Refresh the page
         } else {
           setError(data.error || "Invalid credentials");
         }
