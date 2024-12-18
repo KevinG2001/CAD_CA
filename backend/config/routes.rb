@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   namespace :api do
-    resources :rooms, only: [:index] do
+    resources :rooms, only: [:index, :create] do
       member do
         post :check_availability
       end

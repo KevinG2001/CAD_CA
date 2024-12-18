@@ -1,8 +1,20 @@
 module Api
   class RoomsController < ActionController::API
+    before_action only: [:create]
+
     def index
       @rooms = Room.all
       render json: @rooms
+    end
+
+    def create
+      room = Room.new(room_params)
+  
+      if room.save
+        render json: { message: "Room successfully created!", room: room }, status: :created
+      else
+        render json: { error: room.errors.full_messages }, status: :unprocessable_entity
+      end
     end
 
     def check_availability
@@ -19,5 +31,16 @@ module Api
     end
 
     
+    private
+
+    def room_params
+      params.require(:room).permit(:name)
+    end
+
+    def authorize_admin!
+      unless current_user.admin?
+        render json: { error: "Unauthorized" }, status: :forbidden
+      end
+    end
   end
 end

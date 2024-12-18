@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const LoginForm = ({ onLogin }) => {
+const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -9,6 +9,7 @@ const LoginForm = ({ onLogin }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     fetch("http://localhost:3000/api/auth/login", {
       method: "POST",
       headers: {
@@ -19,8 +20,11 @@ const LoginForm = ({ onLogin }) => {
       .then((response) => response.json())
       .then((data) => {
         if (data.token) {
-          onLogin(data.token, data.is_admin);
-          window.location.reload(); // Refresh the page
+          // Store token and is_admin flag in localStorage
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("is_admin", data.is_admin);
+
+          window.location.reload(); // Optional: Refresh the page to update the UI
         } else {
           setError(data.error || "Invalid credentials");
         }
@@ -37,6 +41,7 @@ const LoginForm = ({ onLogin }) => {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
       </label>
       <label>
@@ -45,10 +50,11 @@ const LoginForm = ({ onLogin }) => {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
       </label>
       <button type="submit">Login</button>
-      {error && <p>{error}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
     </form>
   );
 };
