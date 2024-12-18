@@ -7,7 +7,6 @@ const Bookings = () => {
 
   useEffect(() => {
     const fetchBookings = async () => {
-      console.log("Bearer Token:", localStorage.getItem("token"));
       try {
         const response = await fetch("http://localhost:3000/api/bookings", {
           headers: {
@@ -44,7 +43,6 @@ const Bookings = () => {
     );
 
     const data = await response.json();
-    console.log(data);
 
     if (response.ok) {
       setBookings(bookings.filter((booking) => booking.id !== bookingId));
@@ -64,7 +62,6 @@ const Bookings = () => {
       day < 10 ? "0" + day : day
     }/${year}`;
   };
-  console.log(bookings);
   return (
     <div className="bookings-container">
       <h1>Your Bookings</h1>
