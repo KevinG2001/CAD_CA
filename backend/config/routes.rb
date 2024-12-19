@@ -10,5 +10,7 @@ Rails.application.routes.draw do
 
     post '/auth/signup', to: 'auth#signup'
     post '/auth/login', to: 'auth#login'
+
+    get '*path', to: 'application#index', constraints: ->(req) { !req.xhr? && req.format.html? }
   end
 end
