@@ -15,6 +15,8 @@ module Api
     def create
       room = Room.new(room_params)  
 
+      room.price_per_night ||= 100
+
       if room.save
         render json: { message: "Room successfully created!", room: room }, status: :created
       else
