@@ -18,3 +18,12 @@ test:
 production:
   <<: *default
   database: bookingApp_production
+  cable:
+    adapter: postgresql
+    encoding: unicode
+    database: bookingApp_cable_production
+    pool: 5
+    username: <%= ENV['DB_USER'] %>
+    password: <%= ENV['DB_PASS'] %>
+    host: <%= ENV['DB_HOST'] %>
+    port: 5432
