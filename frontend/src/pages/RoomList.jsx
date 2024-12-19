@@ -8,7 +8,7 @@ const RoomList = () => {
   const [endDate, setEndDate] = useState("");
   const [error, setError] = useState("");
   const [newRoomName, setNewRoomName] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false); // Track if the user is an admin
 
   useEffect(() => {
     // Fetch available rooms
@@ -17,8 +17,9 @@ const RoomList = () => {
       .then((data) => setRooms(data))
       .catch((error) => console.error("Error fetching rooms:", error));
 
+    // Check if the user is an admin from localStorage
     const storedIsAdmin = localStorage.getItem("is_admin");
-    setIsAdmin(storedIsAdmin === "true");
+    setIsAdmin(storedIsAdmin === "true"); // Convert string to boolean
   }, []);
 
   const checkAvailability = () => {
@@ -116,6 +117,65 @@ const RoomList = () => {
     }
   };
 
+  const handleDeleteRoom = async (roomId) => {
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/rooms/${roomId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        setRooms(rooms.filter((room) => room.id !== roomId));
+        console.log("Room deleted successfully");
+      } else {
+        console.error("Failed to delete room");
+      }
+    } catch (error) {
+      console.error("Error deleting room:", error);
+    }
+  };
+
+  const handleEditRoom = async (roomId, newName) => {
+    const token = localStorage.getItem("token");
+
+    if (!newName) {
+      setError("Room name cannot be empty.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/rooms/${roomId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ room: { name: newName } }),
+        }
+      );
+
+      const data = await response.json();
+      if (response.ok) {
+        setRooms(rooms.map((room) => (room.id === roomId ? data.room : room)));
+        console.log("Room updated successfully");
+      } else {
+        console.error("Failed to update room");
+      }
+    } catch (error) {
+      console.error("Error editing room:", error);
+    }
+  };
+
   return (
     <div className="rooms-container">
       <h1>Available Rooms</h1>
@@ -130,6 +190,28 @@ const RoomList = () => {
             <h3>{room.name}</h3>
             <p>Capacity: {room.capacity}</p>
             <button className="book-button available">Select Room</button>
+
+            {isAdmin && (
+              <div className="admin-actions">
+                <button
+                  className="edit-button"
+                  onClick={() => {
+                    const newName = prompt("Enter new room name", room.name);
+                    if (newName) {
+                      handleEditRoom(room.id, newName);
+                    }
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  className="delete-button"
+                  onClick={() => handleDeleteRoom(room.id)}
+                >
+                  Delete
+                </button>
+              </div>
+            )}
           </div>
         ))}
 

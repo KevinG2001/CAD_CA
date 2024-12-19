@@ -30,6 +30,26 @@ module Api
       end
     end
 
+    def update
+      room = Room.find(params[:id])  
+
+      if room.update(room_params)  
+        render json: { message: "Room successfully updated!", room: room }, status: :ok
+      else
+        render json: { error: room.errors.full_messages }, status: :unprocessable_entity
+      end
+    end
+
+    def destroy
+      room = Room.find_by(id: params[:id])
+    
+      if room.nil?
+        render json: { error: "Room not found" }, status: :not_found
+      else
+        room.destroy  
+        render json: { message: "Room and associated bookings successfully deleted" }, status: :ok
+      end
+    end
     
     private
 
