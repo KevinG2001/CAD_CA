@@ -22,6 +22,7 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_18_034836) do
     t.datetime "updated_at", null: false
     t.integer "user_id"
     t.index ["room_id"], name: "index_bookings_on_room_id"
+    t.index ["user_id"], name: "index_bookings_on_user_id"
   end
 
   create_table "rooms", force: :cascade do |t|
@@ -43,4 +44,5 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_18_034836) do
   end
 
   add_foreign_key "bookings", "rooms"
+  add_foreign_key "bookings", "users"
 end
