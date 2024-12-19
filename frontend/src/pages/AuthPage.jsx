@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../components/Login";
 import SignupForm from "../components/Signup";
+import "../styles/AuthPage.css";
 
 const AuthPage = () => {
   const [isSignup, setIsSignup] = useState(false);
