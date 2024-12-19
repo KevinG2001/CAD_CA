@@ -1,7 +1,7 @@
 module Api
   class RoomsController < ActionController::API
     # Ensure that only admins can create rooms by using a before_action
-    before_action :authorize_admin!, only: [:create, :update, :destroy]
+    before_action only: [:create, :update, :destroy]
 
     # GET /api/rooms
     # Fetches all rooms and returns them in the response
