@@ -1,4 +1,4 @@
-name: Deploy to Server
+name: Deploy to Production Server
 
 on:
   push:
@@ -9,33 +9,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Deploy to Server
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
           script: |
-            # Stop the running Rails server (example assumes using a process manager like `kill` or `systemctl`)
-            pkill -f "rails server" || true  # Ignore error if no process is running
+            set -x  
 
-            # Navigate to the app directory
-            cd ~/path/to/your/app
+            cd CAD_CA/backend
 
-            # Pull the latest changes from the deployment branch
+            pkill -f "rails server" || true
+
             git pull origin deployment
 
-            # Install dependencies
-            bundle install --deployment --without development test
+            bundle install
 
-            # Migrate the database (if needed)
-            RAILS_ENV=production bin/rails db:migrate
-
-            # Precompile assets
-            RAILS_ENV=production bin/rails assets:precompile
-
-            # Start the Rails server
-            nohup bin/rails server -b '0.0.0.0' -p 3000 -e production > log/production.log 2>&1 &
+            rails server -b '0.0.0.0' -p 3000 -e production
