@@ -24,6 +24,32 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/CAD_CA/deployment_scripts
-            ./start_server.sh
+            set -e
+
+            echo "Navigating to the project directory"
+            cd ~/CAD_CA
+
+            echo "Stopping any running Rails server"
+            pkill -f "rails server" || true
+
+            echo "Pulling the latest code from the deployment branch"
+            git pull origin deployment
+
+            echo "Installing backend dependencies"
+            cd backend
+            bundle install
+
+            echo "Starting Rails server on 0.0.0.0:3000 in production mode"
+            nohup rails server -b '0.0.0.0' -p 3000 -e production > server.log 2>&1 &
+
+            echo "Navigating to the frontend directory"
+            cd ../frontend
+
+            echo "Installing frontend dependencies"
+            npm install
+
+            echo "Building the frontend"
+            npm run build
+
+            echo "Deployment completed successfully"
           debug: true
