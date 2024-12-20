@@ -17,14 +17,26 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            set -x  
+            # Print a message before starting set -x
+            echo "Starting set -x script"
+            set -x  # This will print each command as it's run
 
+            # Print a message before changing directory
+            echo "Changing directory to CAD_CA/backend"
             cd CAD_CA/backend
 
+            # Print a message before killing the Rails server
+            echo "Stopping any running Rails server"
             pkill -f "rails server" || true
 
+            # Print a message before pulling the latest code from the deployment branch
+            echo "Pulling latest code from deployment branch"
             git pull origin deployment
 
+            # Print a message before installing dependencies
+            echo "Running bundle install"
             bundle install
 
+            # Print a message before starting the Rails server
+            echo "Starting Rails server on 0.0.0.0:3000"
             rails server -b '0.0.0.0' -p 3000 -e production
