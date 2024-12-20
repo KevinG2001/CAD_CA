@@ -27,3 +27,4 @@ jobs:
             cd CAD_CA
             git pull origin deployment
             ./start_server.sh
+          debug: true
