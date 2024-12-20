@@ -1,29 +1,30 @@
-name: Deploy to Production Server
+name: Deploy Application
 
 on:
   push:
     branches:
-      - deployment
-  workflow_dispatch:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # SSH into the server and run the start_server.sh script
-      - name: Run start_server.sh on EC2
-        uses: appleboy/ssh-action@v1.0.0
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.5.3
         with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USERNAME }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Run deployment script via SSH
+        uses: appleboy/ssh-action@v0.1.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            # SSH into the server and run the start_server.sh script
-            echo "Executing the start_server.sh script"
-            bash CAD_CA/deployment_scripts/start_server.sh
+            cd /path/to/your/project
+            git pull origin main
+            ./deploy_script.sh
