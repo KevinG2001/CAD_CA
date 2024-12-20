@@ -17,21 +17,14 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            set -x
-            # Navigate to your app directory
+            set -x  
+
             cd CAD_CA/backend
 
-            # Kill existing Rails server
-            if [ -f tmp/pids/server.pid ]; then
-              kill $(cat tmp/pids/server.pid)
-              rm tmp/pids/server.pid
-            fi
+            pkill -f "rails server" || true
 
-            # Pull latest changes from deployment branch
             git pull origin deployment
 
-            # Install dependencies
             bundle install
 
-            # Restart the Rails server
-            RAILS_ENV=production rails server -d
+            rails server -b '0.0.0.0' -p 3000 -e production
