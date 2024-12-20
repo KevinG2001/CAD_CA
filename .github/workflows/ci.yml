@@ -20,8 +20,8 @@ jobs:
       - name: Run deployment script via SSH
         uses: appleboy/ssh-action@v0.1.0
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd CAD_CA
