@@ -1,4 +1,4 @@
-name: Deploy to Server
+name: Deploy to Production Server
 
 on:
   push:
@@ -8,9 +8,18 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      RAILS_ENV: production
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2" # Specify your Ruby version
+          bundler-cache: true
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.0.0
@@ -18,25 +27,40 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
+          port: ${{ secrets.SSH_PORT }} # Better to keep port in secrets
           script: |
-            # Stop the running Rails server (example assumes using a process manager like `kill` or `systemctl`)
-            pkill -f "rails server" || true  # Ignore error if no process is running
+            # Exit on any error
+            set -e
+
+            # Load environment variables
+            source ~/.bash_profile
 
             # Navigate to the app directory
             cd ~/path/to/your/app
 
-            # Pull the latest changes from the deployment branch
+            # Maintenance mode on
+            touch tmp/maintenance.txt
+
+            # Pull the latest changes
             git pull origin deployment
 
             # Install dependencies
-            bundle install --deployment --without development test
+            bundle config set --local deployment 'true'
+            bundle config set --local without 'development test'
+            bundle install
 
-            # Migrate the database (if needed)
-            RAILS_ENV=production bin/rails db:migrate
+            # Run database migrations
+            bundle exec rails db:migrate
 
-            # Precompile assets
-            RAILS_ENV=production bin/rails assets:precompile
+            # Clear and precompile assets
+            bundle exec rails assets:clean
+            bundle exec rails assets:precompile
 
-            # Start the Rails server
-            nohup bin/rails server -b '0.0.0.0' -p 3000 -e production > log/production.log 2>&1 &
+            # Restart application server (using systemd)
+            sudo systemctl restart your-rails-app.service
+
+            # Remove maintenance mode
+            rm tmp/maintenance.txt
+
+            # Verify deployment
+            curl -f http://localhost:3000/health_check || exit 1
