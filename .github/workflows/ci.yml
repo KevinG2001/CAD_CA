@@ -26,5 +26,5 @@ jobs:
           port: 22
           script: |
             cd /path/to/your/project
-            git pull origin main
+            git pull origin deployment
             ./deploy_script.sh
