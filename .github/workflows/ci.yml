@@ -24,6 +24,6 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/CAD_CA/
+            cd ~/CAD_CA/deployment_scripts
             ./start_server.sh
           debug: true
