@@ -8,7 +8,7 @@ const Bookings = () => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/bookings", {
+        const response = await fetch("/api/bookings", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -31,16 +31,13 @@ const Bookings = () => {
   }, []);
 
   const cancelBooking = async (bookingId) => {
-    const response = await fetch(
-      `http://localhost:3000/api/bookings/${bookingId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
+    const response = await fetch(`/api/bookings/${bookingId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
 
     const data = await response.json();
 

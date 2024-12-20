@@ -11,7 +11,7 @@ const SignupForm = ({ onSignup }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetch("http://localhost:3000/api/auth/signup", {
+    fetch("/api/auth/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

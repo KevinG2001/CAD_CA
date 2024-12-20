@@ -12,7 +12,7 @@ const RoomList = () => {
 
   useEffect(() => {
     // Fetch available rooms
-    fetch("http://localhost:3000/api/rooms")
+    fetch("/api/rooms")
       .then((response) => response.json())
       .then((data) => setRooms(data))
       .catch((error) => console.error("Error fetching rooms:", error));
@@ -28,16 +28,13 @@ const RoomList = () => {
       return;
     }
 
-    fetch(
-      `http://localhost:3000/api/rooms/${selectedRoom.id}/check_availability`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ start_date: startDate, end_date: endDate }),
-      }
-    )
+    fetch(`/api/rooms/${selectedRoom.id}/check_availability`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ start_date: startDate, end_date: endDate }),
+    })
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {
@@ -61,7 +58,7 @@ const RoomList = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/bookings", {
+      const response = await fetch("/api/bookings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -94,7 +91,7 @@ const RoomList = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/rooms", {
+      const response = await fetch("/api/rooms", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -121,16 +118,13 @@ const RoomList = () => {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/rooms/${roomId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`/api/rooms/${roomId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.ok) {
         setRooms(rooms.filter((room) => room.id !== roomId));
@@ -152,17 +146,14 @@ const RoomList = () => {
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/rooms/${roomId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ room: { name: newName } }),
-        }
-      );
+      const response = await fetch(`/api/rooms/${roomId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ room: { name: newName } }),
+      });
 
       const data = await response.json();
       if (response.ok) {
