@@ -8,59 +8,29 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    env:
-      RAILS_ENV: production
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.2" # Specify your Ruby version
-          bundler-cache: true
-
-      - name: Deploy to Server
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }} # Better to keep port in secrets
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
           script: |
-            # Exit on any error
-            set -e
+            # Navigate to your app directory
+            cd /path/to/your/rails/app
 
-            # Load environment variables
-            source ~/.bash_profile
+            # Kill existing Rails server
+            if [ -f tmp/pids/server.pid ]; then
+              kill $(cat tmp/pids/server.pid)
+              rm tmp/pids/server.pid
+            fi
 
-            # Navigate to the app directory
-            cd ~/path/to/your/app
-
-            # Maintenance mode on
-            touch tmp/maintenance.txt
-
-            # Pull the latest changes
+            # Pull latest changes from deployment branch
             git pull origin deployment
 
             # Install dependencies
-            bundle config set --local deployment 'true'
-            bundle config set --local without 'development test'
             bundle install
 
-            # Run database migrations
-            bundle exec rails db:migrate
-
-            # Clear and precompile assets
-            bundle exec rails assets:clean
-            bundle exec rails assets:precompile
-
-            # Restart application server (using systemd)
-            sudo systemctl restart your-rails-app.service
-
-            # Remove maintenance mode
-            rm tmp/maintenance.txt
-
-            # Verify deployment
-            curl -f http://localhost:3000/health_check || exit 1
+            # Restart the Rails server
+            RAILS_ENV=production rails server -d
