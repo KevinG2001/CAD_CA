@@ -3,7 +3,7 @@ name: Deploy Application
 on:
   push:
     branches:
-      - main
+      - deployment
 
 jobs:
   deploy:
@@ -25,6 +25,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            cd /path/to/your/project
+            cd CAD_CA
             git pull origin deployment
             ./deploy_script.sh
