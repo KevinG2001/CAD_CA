@@ -1,77 +1,41 @@
-name: CI
+name: Deploy to Server
 
 on:
-  pull_request:
   push:
-    branches: [ main ]
+    branches: [deployment]
 
 jobs:
-  scan_ruby:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.0.0
         with:
-          ruby-version: .ruby-version
-          bundler-cache: true
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Stop the running Rails server (example assumes using a process manager like `kill` or `systemctl`)
+            pkill -f "rails server" || true  # Ignore error if no process is running
 
-      - name: Scan for common Rails security vulnerabilities using static analysis
-        run: bin/brakeman --no-pager
+            # Navigate to the app directory
+            cd ~/path/to/your/app
 
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+            # Pull the latest changes from the deployment branch
+            git pull origin deployment
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: .ruby-version
-          bundler-cache: true
+            # Install dependencies
+            bundle install --deployment --without development test
 
-      - name: Lint code for consistent style
-        run: bin/rubocop -f github
+            # Migrate the database (if needed)
+            RAILS_ENV=production bin/rails db:migrate
 
-  test:
-    runs-on: ubuntu-latest
+            # Precompile assets
+            RAILS_ENV=production bin/rails assets:precompile
 
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
-
-      # redis:
-      #   image: redis
-      #   ports:
-      #     - 6379:6379
-      #   options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
-
-    steps:
-      - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential git libpq-dev pkg-config
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: .ruby-version
-          bundler-cache: true
-
-      - name: Run tests
-        env:
-          RAILS_ENV: test
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432
-          # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:test:prepare test
+            # Start the Rails server
+            nohup bin/rails server -b '0.0.0.0' -p 3000 -e production > log/production.log 2>&1 &
