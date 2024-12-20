@@ -1,0 +1,35 @@
+name: Deploy to Production Server
+
+on:
+  push:
+    branches: [deployment]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Deploy to EC2 and run the start_server.sh script
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            # Upload the start_server.sh script to the remote server
+            echo "Uploading start_server.sh to the server"
+            scp -i ${{ secrets.SSH_PRIVATE_KEY }} deployment-scripts/start_server.sh ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }}:/tmp/start_server.sh
+
+            # SSH into the server and run the script
+            echo "Executing the start_server.sh script"
+            ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }} 'bash /tmp/start_server.sh'
+
+            # Optionally, clean up the script from the server after execution
+            echo "Cleaning up the start_server.sh script"
+            ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }} 'rm /tmp/start_server.sh'
