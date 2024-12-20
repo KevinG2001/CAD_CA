@@ -1,5 +1,6 @@
-# Ensure the script stops on error
 set -e
+
+cd /CAD_CA/backend  
 
 echo "Stopping any running Rails server"
 pkill -f "rails server" || true
