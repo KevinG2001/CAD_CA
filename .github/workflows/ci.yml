@@ -24,7 +24,6 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd CAD_CA
-            git pull origin deployment
+            cd ~/CAD_CA/
             ./start_server.sh
           debug: true
