@@ -26,4 +26,4 @@ jobs:
           script: |
             cd CAD_CA
             git pull origin deployment
-            ./deploy_script.sh
+            ./start_server.sh
