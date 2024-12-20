@@ -1,6 +1,6 @@
 set -e
 
-cd /CAD_CA/backend  
+cd ~/CAD_CA/backend
 
 echo "Stopping any running Rails server"
 pkill -f "rails server" || true
