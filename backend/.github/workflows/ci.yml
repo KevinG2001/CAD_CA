@@ -17,8 +17,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            set -x
             # Navigate to your app directory
-            cd /path/to/your/rails/app
+            cd CAD_CA/backend
 
             # Kill existing Rails server
             if [ -f tmp/pids/server.pid ]; then
