@@ -1,30 +1,52 @@
-name: Deploy Application
+name: Deploy to Server
 
 on:
   push:
     branches:
-      - deployment
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Set up SSH key
-        uses: webfactory/ssh-agent@v0.5.3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          node-version: "16"
 
-      - name: Run deployment script via SSH
+      - name: Install React dependencies
+        run: |
+          cd frontend  # Replace with the actual path to your React app
+          npm install
+
+      - name: Build React app
+        run: |
+          cd frontend
+          npm run build  # This will generate the dist folder in your build directory
+
+      - name: SSH and deploy
         uses: appleboy/ssh-action@v0.1.0
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
           script: |
-            cd CAD_CA
-            git pull origin deployment
-            ./deploy_script.sh
+            # Step 6: Navigate to the backend folder and stop the Ruby server
+            cd CAD_CA/backend
+            pkill -f 'rails server'  # Stops the Ruby server if running
+
+            # Step 7: Pull latest changes from the main branch
+            git fetch origin
+            git checkout main
+            git pull origin main
+
+            # Step 8: Update frontend dist files to backend public folder
+            rm -rf public/*  # Clean up existing files in the public folder
+            cp -r /path/to/frontend/build/* public/  # Copy the build files to the backend public folder
+
+            # Step 9: Restart the Ruby server in the background
+            nohup rails server -b '0.0.0.0' -p 3000 -e production > server.log 2>&1 &
