@@ -180,8 +180,9 @@ const RoomList = () => {
           >
             <h3>{room.name}</h3>
             <p>Capacity: {room.capacity}</p>
+            <p>Price per Night: ${room.price_per_night}</p>{" "}
+            {/* Displaying price per night */}
             <button className="book-button available">Select Room</button>
-
             {isAdmin && (
               <div className="admin-actions">
                 <button
