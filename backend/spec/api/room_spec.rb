@@ -8,13 +8,13 @@ RSpec.describe 'Api::RoomsController', type: :request do
 
   let(:valid_room_params) do
     {
-      room: { name: 'Room 102' }
+      room: { name: 'Room 102', price_per_night: 150.0 }
     }
   end
 
   let(:invalid_room_params) do
     {
-      room: { name: '' }
+      room: { name: '', price_per_night: 100.0 }
     }
   end
 
@@ -26,7 +26,7 @@ RSpec.describe 'Api::RoomsController', type: :request do
 
       it 'returns all rooms' do
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('Room 101') # Adjust the room name as needed
+        expect(response.body).to include('Room 101') 
       end
     end
   end
@@ -57,6 +57,4 @@ RSpec.describe 'Api::RoomsController', type: :request do
       end
     end
   end
-
-
 end
