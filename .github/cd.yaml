@@ -1,0 +1,67 @@
+name: Deploy Application
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Stop the server on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            # Stop the server using pm2 (or your process manager)
+            pm2 stop all || true
+          EOF
+
+      - name: Pull latest updates on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            cd /CAD_CA/backend/repository
+
+            git pull origin main
+          EOF
+
+      - name: Remove contents of the public folder in the backend
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            rm -rf /path/to/your/backend/public/*
+          EOF
+
+      - name: Build frontend
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            cd /CAD_CA/frontend
+
+            npm install
+            npm run build
+          EOF
+
+      - name: Copy the built files to the backend/public folder
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            cp -r /path/to/your/frontend/dist/* /path/to/your/backend/public/
+          EOF
+
+      - name: Install backend dependencies
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            cd /CAD_CA/backend
+            bundle install
+          EOF
+
+      - name: Restart the server on EC2 using tmux
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            tmux new-session -d -s rails_server 'rails server -b 0.0.0.0 -p 3000 -e production'
+          EOF
